@@ -1,0 +1,16 @@
+<!-- If success exists and is not empty (when length is 0 it is falsy) -->
+<% if(success && success.length) {%> 
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <%= success %> 
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+</div>
+<% } %> 
+<!-- If error exists and is not empty (when length is 0 it is falsy) -->
+<% if(error && error.length) {%> 
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error %> 
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    </div>
+<% } %> 
