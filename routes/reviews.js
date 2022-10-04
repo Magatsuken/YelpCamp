@@ -7,6 +7,7 @@ const ExpressError = require('../util/ExpressError');
 const { reviewSchema} = require('../schemas.js');
 const Review = require('../models/review');
 const Campground = require('../models/campground');
+const { isLoggedIn } = require('../middleware');
 
 
 
@@ -21,7 +22,7 @@ const validateReview = (req, res, next) => {
 }
 
 // POST route for reviews
-router.post('/', validateReview, catchAsync(async (req, res) => {
+router.post('/', isLoggedIn, validateReview, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
     const review = new Review(req.body.review);
@@ -33,7 +34,7 @@ router.post('/', validateReview, catchAsync(async (req, res) => {
 }))
 
 // Delete route for reviews
-router.delete('/:reviewId', catchAsync(async (req, res) => {
+router.delete('/:reviewId', isLoggedIn, catchAsync(async (req, res) => {
     const {id, reviewId} = req.params;
     // $pull is a function with mongoose, read docs :)
     await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId}});

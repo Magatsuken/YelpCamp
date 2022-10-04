@@ -5,6 +5,7 @@ const ExpressError = require('../util/ExpressError');
 const Campground = require('../models/campground');
 const { campgroundSchema } = require('../schemas.js');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { isLoggedIn } = require('../middleware');
 
 const validateCampground = (req, res, next) => {
     const { error } = campgroundSchema.validate(req.body);
@@ -23,12 +24,12 @@ router.get('/', catchAsync(async (req, res) => {
 }))
 
 // Form for new campground
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
     res.render('campgrounds/new');
 })
 
 // Post route to create new campground
-router.post('/', validateCampground, catchAsync(async (req, res, next) => {
+router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     req.flash('success', 'Successfully made a new campground!');
@@ -36,7 +37,7 @@ router.post('/', validateCampground, catchAsync(async (req, res, next) => {
 }))
 
 // Edit form
-router.get('/:id/edit', catchAsync(async (req, res) => {
+router.get('/:id/edit', isLoggedIn, catchAsync(async (req, res) => {
     const { id } = req.params;
     if (ObjectId.isValid(id)) {
         const campground = await Campground.findById(id);
@@ -48,7 +49,7 @@ router.get('/:id/edit', catchAsync(async (req, res) => {
 }))
 
 // PUT route that will update
-router.put('/:id', validateCampground, catchAsync(async (req, res) => {
+router.put('/:id', isLoggedIn, validateCampground, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
     req.flash('success', 'Succesfully updated campground!');
@@ -56,7 +57,7 @@ router.put('/:id', validateCampground, catchAsync(async (req, res) => {
 }))
 
 // DELETE route for campgrounds
-router.delete('/:id', catchAsync(async (req, res) => {
+router.delete('/:id', isLoggedIn, catchAsync(async (req, res) => {
     const { id } = req.params;
     const deletedCampground = await Campground.findByIdAndDelete(id);
     req.flash('success', 'Succesfully deleted campground!');
