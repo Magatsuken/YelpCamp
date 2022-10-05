@@ -3,29 +3,16 @@ const express = require('express');
 // This will cause an error when trying to use req.params
 const router = express.Router({mergeParams: true});
 const catchAsync = require('../util/catchAsync');
-const ExpressError = require('../util/ExpressError');
-const { reviewSchema} = require('../schemas.js');
 const Review = require('../models/review');
 const Campground = require('../models/campground');
-const { isLoggedIn } = require('../middleware');
-
-
-
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
-    } else {
-        return next();
-    }
-}
+const { isLoggedIn, validateReview, isReviewAuthor } = require('../middleware');
 
 // POST route for reviews
 router.post('/', isLoggedIn, validateReview, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id);
     const review = new Review(req.body.review);
+    review.author = req.user._id;
     campground.reviews.push(review);
     await review.save();
     await campground.save();
@@ -34,7 +21,7 @@ router.post('/', isLoggedIn, validateReview, catchAsync(async (req, res) => {
 }))
 
 // Delete route for reviews
-router.delete('/:reviewId', isLoggedIn, catchAsync(async (req, res) => {
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(async (req, res) => {
     const {id, reviewId} = req.params;
     // $pull is a function with mongoose, read docs :)
     await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId}});

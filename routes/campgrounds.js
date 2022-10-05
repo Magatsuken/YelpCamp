@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const catchAsync = require('../util/catchAsync');
 const Campground = require('../models/campground');
-const { campgroundSchema } = require('../schemas.js');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware');
 
@@ -58,7 +57,13 @@ router.delete('/:id', isLoggedIn, isAuthor, catchAsync(async (req, res) => {
 router.get('/:id', catchAsync(async (req, res, next) => {
     const { id } = req.params;
     if (ObjectId.isValid(id)) {
-        const campground = await Campground.findById(id).populate('reviews').populate('author');
+        const campground = await Campground.findById(id).populate({
+            path: 'reviews',
+            populate: {
+                path: 'author'
+            }
+        }).populate('author');
+        console.log(campground);
         res.render('campgrounds/show', { campground });
     } else {
         req.flash('error', 'Cannot find that campground!');
