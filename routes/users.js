@@ -5,19 +5,19 @@ const catchAsync = require('../util/catchAsync');
 const passport = require('passport');
 const users = require('../controllers/users');
 
-// Render register form
-router.get('/register', users.renderRegisterForm);
+router.route('/register')
+    // Render register form
+    .get(users.renderRegisterForm)
+    // Create new user
+    .post(catchAsync(users.createUser))
 
-// Create new user
-router.post('/register', catchAsync(users.createUser));
-
-// Render login form
-router.get('/login', users.renderLoginForm);
-
-// Passport middleware to authenticate a login
-// Keep session info set to true is needed to get the redirect to work properly
-// User login
-router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login', keepSessionInfo: true }), users.login)
+router.route('/login')
+    // Render login form
+    .get(users.renderLoginForm)
+    // Passport middleware to authenticate a login
+    // Keep session info set to true is needed to get the redirect to work properly
+    // User login
+    .post(passport.authenticate('local', { failureFlash: true, failureRedirect: '/login', keepSessionInfo: true }), users.login)
 
 
 // User logout
